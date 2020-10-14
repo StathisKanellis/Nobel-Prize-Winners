@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Nobel Prize Winners</title>
+
+    <link href="Content/bootstrap.css" rel="stylesheet" />
+    <script src="Scripts/angular.js"></script>
+
+    <script>
+        var app = angular.module('NobelApp', []);
+        app.controller("NobelController", function ($scope, $http) {
+            $http.get("http://api.nobelprize.org/v1/prize.json?")
+                .then(function (response) {
+                    //console.log(response.data.prizes);
+                    $scope.prizes = response.data.prizes;
+                });
+            $scope.getData = function (id) {
+                $http.get("http://api.nobelprize.org/v1/laureate.json?id=" + id)
+                    .then(function (response) {
+                        console.log(response.data.laureates[0]);
+                        $scope.laureate = response.data.laureates[0];
+                        console.log($scope.laureate.firstname);
+                    });
+            }
+        });
+    </script>
+
+    <script>
+        function ClickShowAndHide() {
+            var button = document.getElementById("monitor");
+            if (button.style.display == "none") {
+                button.style.display = "block";
+            } else {
+                button.style.display = "none";
+            }
+        }
+    </script>
+
+    <style>
+        #monitor{
+            width:300px;
+            height:100px;
+            position:fixed;
+            background-color:#17a2b8;
+            color:white;
+            top:50%;
+            padding:10px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div ng-app="NobelApp">
+        
+        <div ng-controller="NobelController">
+            
+            <div ng-controller="NobelController">
+                <div id="monitor" class="align-content-center" style="display:none">
+                    <ul>
+                        <li>{{laureate.id}} | {{laureate.firstname}} | {{laureate.surname}} | {{laureate.gender}}</li>
+                        <li>{{laureate.bornCountry}} | {{laureate.born}}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center">Year</th>
+                        <th class="text-center">Category</th>
+                        <th class="text-center">Laureate 1</th>
+                        <th class="text-center">Laureate 2</th>
+                        <th class="text-center">Laureate 3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th><input type="text" ng-model="search.year" placeholder="Search Year" /></th>
+                        <th><input type="text" ng-model="search.category" placeholder="Search Category" /></th>
+                    </tr>
+                    <tr ng-repeat="prize in prizes | filter : search:strict">
+                        <td class="align-middle text-center">{{prize.year}}</td>
+                        <td class="align-middle text-center">{{prize.category | uppercase}}</td>
+
+                        <td width="30%" class="p-4" ng-repeat="laureate in prize.laureates">
+                            <div class="row">
+                                <div class="col-3">
+                                    <span class="d-block font-weight-bold">Id:</span>
+                                    <hr />
+                                    <span class="d-block font-weight-bold">FullName:</span>
+                                    <hr />
+                                    <span class="d-block font-weight-bold">Motivation:</span>
+                                    <hr />
+                                    <button class="d-block font-weight-bold btn btn-sm btn-block btn-info text-center" onclick="ClickShowAndHide()" ng-mouseup="getData(laureate.id)">Details:</button>
+                                </div>
+
+                                <div class="col">
+                                    <span class="d-block">{{laureate.id}}</span>
+                                    <hr />
+                                    <span class="d-block">{{laureate.firstname}} {{laureate.surname}}</span>
+                                    <hr />
+                                    <span class="d-block">{{laureate.motivation}}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div> 
+</body>
+</html>
